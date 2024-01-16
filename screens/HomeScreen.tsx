@@ -2,7 +2,8 @@ import {useEffect} from 'react';
 import {Text, View } from 'react-native';
 import {PermissionsAndroid} from 'react-native';
 import {StackNavigationProp} from '@react-navigation/stack';
-import ZipFilePicker from '../components/ZipFilePicker';
+import ZipFilePickerForNonFollowers from '../components/ZipFilePickerForNonFollowers';
+import ZipFilePickerForLostFollowers from '../components/ZipFilePickerForLostFollowers';
 
 
 export type FollowerDataArray = Array<{
@@ -70,7 +71,10 @@ function HomeScreen(props: HomeScreenProps): JSX.Element {
       <View style={{flex:1 , top:"40%"}}>
         <View style={{marginRight:12,marginLeft:12}}>
         <Text style={{fontSize:26,fontWeight:"bold",textAlign:"center",marginBottom:16}}>Instagram Unfollower</Text>
-        <ZipFilePicker navigation={navigation}/>
+        <Text>Check for not following you back</Text>
+        <ZipFilePickerForNonFollowers navigation={navigation}/>
+        <Text>Check for lost followers</Text>
+        <ZipFilePickerForLostFollowers navigation={navigation}/>
         </View>
       </View>
     

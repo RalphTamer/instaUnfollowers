@@ -1,8 +1,8 @@
 import {unzip} from 'react-native-zip-archive';
-import {targetPath} from '../components/ZipFilePicker';
 import RNFS from 'react-native-fs';
 import {Alert} from 'react-native';
 import {FollowerDataArray, FollowingDataArray} from '../screens/HomeScreen';
+import { targetPath } from '../components/ZipFilePickerForNonFollowers';
 
 export const extractZipFile = async (args: {
   sourcePath: string;
