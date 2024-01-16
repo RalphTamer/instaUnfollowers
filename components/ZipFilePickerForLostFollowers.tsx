@@ -18,7 +18,7 @@ type ZipFileProps = {
 };
 const ZipFilePickerForLostFollowers = (props: ZipFileProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [snapshotFollowers , setSnapshotFollowers] = useState<{
+  const [previousFollowers , setPreviousFollowers] = useState<{
     type: "Following";
     data: FollowingDataArray;
 } | {
@@ -35,57 +35,6 @@ const ZipFilePickerForLostFollowers = (props: ZipFileProps) => {
 } | undefined>(undefined)
   const onPressHandler = async () => {
     try {
-    //   const res = await DocumentPicker.pick({
-    //     type: [types.zip],
-    //   });
-    //   setIsLoading(true);
-
-    //   await extractZipFile({
-    //     sourcePath: res[0].uri,
-    //     name:
-    //       res[0].name != null
-    //         ? res[0].name
-    //         : `${Math.floor(Math.random() * 1000000)}`,
-    //   });
-
-    //   const followers = await readFile(
-    //     filesAbsPath + 'followers_1.json',
-    //     'utf8',
-    //   ).catch(err => {
-    //     setIsLoading(false);
-    //     Alert.alert(err);
-    //   });
-
-
-    //   if (typeof followers !== 'string') {
-    //     setIsLoading(false);
-    //     return Alert.alert('Error something is wrong');
-    //   }
-
-    //   const parsedJsonFollowersUserData = jsonUserDataParser({
-    //     type: 'Followers',
-    //     content: followers,
-    //   });
-      
-    //   setIsLoading(false);
-
-      
-    } catch (err) {
-      if (DocumentPicker.isCancel(err)) {
-        setIsLoading(false);
-        // User cancelled the picker
-      } else {
-        throw err;
-      }
-    }
-  };
-
-  return (
-    <View>
-      <View style={{
-        marginBottom:12
-      }}>
-      <Button title="Pick snapshot" onPress={async ()=>{
         const res = await DocumentPicker.pick({
             type: [types.zip],
           });
@@ -110,67 +59,75 @@ const ZipFilePickerForLostFollowers = (props: ZipFileProps) => {
     
           if (typeof followers !== 'string') {
             setIsLoading(false);
-            return Alert.alert('Error something is wrong');
+            Alert.alert('Error something is wrong');
+            return null
           }
     
           const parsedJsonFollowersUserData = jsonUserDataParser({
             type: 'Followers',
             content: followers,
           });
-          setSnapshotFollowers(parsedJsonFollowersUserData)
-          setIsLoading(false)
+          return parsedJsonFollowersUserData
+
+      
+    }
+     catch (err) {
+      if (DocumentPicker.isCancel(err)) {
+        setIsLoading(false);
+        return null
+        // User cancelled the picker
+      } else {
+          throw err;
+        
+      }
+    }
+  };
+
+  return (
+    <View>
+      <View style={{
+        marginBottom:12
+      }}>
+      <Button title={previousFollowers != null ?`Picked previous Zip file`:'Pick previous Zip file'}
+       onPress={async ()=>{
+        const parsedJsonFollowersUserData = await onPressHandler()
+
+        if (parsedJsonFollowersUserData == null) return
+
+        setPreviousFollowers(parsedJsonFollowersUserData)
+          
           if (
             parsedJsonFollowersUserData != null && latestFollowers !=null
           ) {
-            props.navigation.navigate('LostFollowers', {
-              latestFollowers: latestFollowers.data,
-              snapshotFollowers:parsedJsonFollowersUserData.data
-            });
+            props.navigation.navigate('FollowersInfo', {
+                followersParsedJsonData: latestFollowers.data,
+                previousFollowersParsedJsonData: parsedJsonFollowersUserData.data,
+              });
           }
+      setIsLoading(false);
       }} />
-      <Button title="Pick latest Zip file" onPress={async ()=>{
-         const res = await DocumentPicker.pick({
-            type: [types.zip],
-          });
-          setIsLoading(true);
-    
-          await extractZipFile({
-            sourcePath: res[0].uri,
-            name:
-              res[0].name != null
-                ? res[0].name
-                : `${Math.floor(Math.random() * 1000000)}`,
-          });
-    
-          const followers = await readFile(
-            filesAbsPath + 'followers_1.json',
-            'utf8',
-          ).catch(err => {
-            setIsLoading(false);
-            Alert.alert(err);
-          });
-    
-    
-          if (typeof followers !== 'string') {
-            setIsLoading(false);
-            return Alert.alert('Error something is wrong');
-          }
-    
-          const parsedJsonFollowersUserData = jsonUserDataParser({
-            type: 'Followers',
-            content: followers,
-          });
+      
+      </View>
+      <View style={{
+        marginBottom:12
+      }}>
+      <Button title={latestFollowers != null ?`Picked latest Zip file`:'Pick latest Zip file'} onPress={async ()=>{
+         const parsedJsonFollowersUserData = await onPressHandler()
+
+         if (parsedJsonFollowersUserData == null) return
+         
           setLatestFollowers(parsedJsonFollowersUserData)
           setIsLoading(false)
           if (
-            parsedJsonFollowersUserData != null && snapshotFollowers !=null
+            parsedJsonFollowersUserData != null && previousFollowers !=null
           ) {
-            props.navigation.navigate('LostFollowers', {
-              latestFollowers: parsedJsonFollowersUserData.data,
-              snapshotFollowers:snapshotFollowers.data
-            });
+            props.navigation.navigate('FollowersInfo', {
+                followersParsedJsonData: parsedJsonFollowersUserData.data,
+                previousFollowersParsedJsonData: previousFollowers.data,
+              });
           }
       }} />
+      
       </View>
       <View>
       </View>

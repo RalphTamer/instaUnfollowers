@@ -9,113 +9,77 @@ type DetailsScreenProps = {
 };
 function FollowersInfoScreen(props: DetailsScreenProps): JSX.Element {
   const {route} = props;
+
   const [followersData , setFollowersData] = useState<{
     name:string,
     url:string
   }[] | null>(null)
-  const [selectedValue , setSelectedValue] = useState<string>()
-  const {followersParsedJsonData, followingParsedJsonData} = route.params as {
+
+  const {followersParsedJsonData, followingParsedJsonData,previousFollowersParsedJsonData} = route.params as {
     followersParsedJsonData: FollowerDataArray;
-    followingParsedJsonData: FollowingDataArray;
+    followingParsedJsonData?: FollowingDataArray;
+    previousFollowersParsedJsonData?: FollowerDataArray;
   };
 
-  if (followersParsedJsonData == null || followingParsedJsonData == null) {
+  if (followersParsedJsonData == null) {
     return <div>nothing to see here</div>;
   }
 
  
-
   const getOriginalDataList = () =>{
     const notFollowingYou: {
       name: string;
       url: string;
     }[] = [];
-    
-    followingParsedJsonData.forEach(person => {
-      if (
-        followersParsedJsonData.find(
-          p => p.followerName === person.followingName,
-        )
-      ) {
-        // do notin
-      } else {
-        notFollowingYou.push({
-          name: person.followingName,
-          url: person.followingUrl,
-        });
-      }
-    })
-    return notFollowingYou
-  }
+
+    if(followingParsedJsonData != null){
+      followingParsedJsonData.forEach(person => {
+        if (
+          followersParsedJsonData.find(
+            p => p.followerName === person.followingName,
+          )
+        ) {
+          // do notin
+        } else {
+          notFollowingYou.push({
+            name: person.followingName,
+            url: person.followingUrl,
+          });
+        }
+      })
+      return notFollowingYou
+    }else if(previousFollowersParsedJsonData != null){
+      
+      previousFollowersParsedJsonData.forEach(person => {
+        if (
+          followersParsedJsonData.find(
+            p => p.followerName === person.followerName,
+          )
+        ) {
+          // do notin
+        } else {
+          notFollowingYou.push({
+            name: person.followerName,
+            url: person.followerUrl,
+          });
+        }
+      })
   
+      return notFollowingYou
+    }else{
+      throw new Error("something not right!!");
+    }
+    
+  }
+
   useEffect(()=>{
     setFollowersData(getOriginalDataList()) 
     
   },[])
 
-  const items = [
-    { label: 'original', value: 'original' },
-    { label: 'sort by A-Z', value: 'AZ' },
-    { label: 'sort by Z-A', value: 'ZA' },
-  ];
-  
-  const pickerSelectStyles = StyleSheet.create({
-    inputIOS: {
-      fontSize: 16,
-      paddingVertical: 12,
-      paddingHorizontal: 10,
-      borderWidth: 1,
-      borderColor: 'gray',
-      borderRadius: 4,
-      color: 'black',
-      paddingRight: 30,
-    },
-    inputAndroid: {
-      fontSize: 16,
-      paddingVertical: 12,
-      paddingHorizontal: 10,
-      borderWidth: 1,
-      borderColor: 'gray',
-      borderRadius: 4,
-      color: 'black',
-      paddingRight: 30,
-    },
-  });
 
   return (
     <View style={{flex:1}}>
-      <View style={{
-        display:"flex",
-        flexDirection:"row",
-        justifyContent:"space-between",
-        padding:10,
-      }}>
-        <Text>SORT</Text>
-        <RNPickerSelect
-        
-        items={items}
-        onValueChange={
-          (value) => 
-        {
-          if (followersData == null)
-            return
-
-          if(value === "AZ"){
-            const sorted =  [...followersData].sort((a, b) => a.name.localeCompare(b.name))
-            setFollowersData(sorted)
-          }else if(value === "ZA"){
-            const sorted =  [...followersData].sort((a, b) => b.name.localeCompare(a.name))
-            setFollowersData(sorted)
-          }else if(value === "original"){
-            setFollowersData(getOriginalDataList())
-          }
-          setSelectedValue(value)
-        }
-        }
-        value={selectedValue}
-        style={pickerSelectStyles}
-      />
-      </View>
       <ScrollView>
       <View
         style={{
